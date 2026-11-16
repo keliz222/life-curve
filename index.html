@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Life Curve</title>
+    <meta
+      name="description"
+      content="Enter your birth date and time to see the ups and downs of your life from your Chinese Bazi chart, then add your own life events to change the forecast."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto:wght@300;400;500;700&display=swap"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="page-header">
+      <div class="header-top">
+        <h1>Life Curve</h1>
+        <label class="theme-picker">
+          Theme
+          <select id="theme-picker">
+            <option value="auto">Auto (match my computer)</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
+      </div>
+      <p class="tagline">
+        Enter when you were born to see the ups and downs of your life, read from your Chinese Bazi (八字) chart.
+        Then add the things you did or that happened to you, and watch your future change.
+      </p>
+    </header>
+
+    <main>
+      <section class="card section section-how" aria-labelledby="how-heading">
+        <h2 id="how-heading"><span class="section-badge" aria-hidden="true">解</span>How it works</h2>
+        <ol class="how-cards">
+          <li class="how-card">
+            <div class="how-picture" aria-hidden="true">
+              <div class="mini-pillars">
+                <span><small>Year</small><b class="wood">乙</b><b class="metal">酉</b></span>
+                <span><small>Month</small><b class="earth">戊</b><b class="water">子</b></span>
+                <span><small>Day</small><b class="metal">辛</b><b class="fire">巳</b></span>
+                <span><small>Hour</small><b class="water">壬</b><b class="earth">辰</b></span>
+              </div>
+            </div>
+            <h3><span class="how-number">1</span>Birth → 8 characters</h3>
+            <p>Your birth year, month, day, and hour each become two Chinese characters: your Bazi 八字.</p>
+          </li>
+          <li class="how-card">
+            <div class="how-picture" aria-hidden="true">
+              <svg viewBox="0 0 120 84" class="mini-ring">
+                <g class="mini-ring-arrows">
+                  <path d="M60 14 L94 38 L81 74 L39 74 L26 38 Z" />
+                </g>
+                <circle cx="60" cy="14" r="11" class="fill-fire" /><text x="60" y="18">火</text>
+                <circle cx="94" cy="38" r="11" class="fill-earth" /><text x="94" y="42">土</text>
+                <circle cx="81" cy="74" r="11" class="fill-metal" /><text x="81" y="78">金</text>
+                <circle cx="39" cy="74" r="11" class="fill-water" /><text x="39" y="78">水</text>
+                <circle cx="26" cy="38" r="11" class="fill-wood" /><text x="26" y="42">木</text>
+              </svg>
+            </div>
+            <h3><span class="how-number">2</span>Five elements</h3>
+            <p>Each character is Wood, Fire, Earth, Metal, or Water. Like rock-paper-scissors, some help you and some strain you.</p>
+          </li>
+          <li class="how-card">
+            <div class="how-picture" aria-hidden="true">
+              <svg viewBox="0 0 120 84" class="mini-curve">
+                <line x1="4" y1="42" x2="116" y2="42" class="mini-mid" />
+                <polyline points="4,50 18,36 30,30 42,40 54,58 66,62 78,44 90,24 102,20 116,32" />
+                <circle cx="54" cy="58" r="3.5" class="fill-hard" />
+                <circle cx="102" cy="20" r="3.5" class="fill-good" />
+              </svg>
+            </div>
+            <h3><span class="how-number">3</span>Every year scores</h3>
+            <p>Each year brings its own elements. Helpful years rise, hard ones dip. Your own events bend it further.</p>
+          </li>
+        </ol>
+        <details class="explainer">
+          <summary>What is Bazi? Learn more</summary>
+          <dl class="glossary">
+            <dt>天干 地支</dt>
+            <dd><strong>Stems and branches.</strong> Every year, month, day, and hour has a top character (10 stems) and a bottom one (12 branches, the zodiac animals).</dd>
+            <dt>日主</dt>
+            <dd><strong>Day master.</strong> The top character of your day pillar. It stands for you.</dd>
+            <dt>强 弱</dt>
+            <dd><strong>Strong or weak.</strong> A strong chart is helped by what drains it; a weak one by what supports it.</dd>
+            <dt>大运 流年</dt>
+            <dd><strong>Luck cycles and years.</strong> A new cycle every 10 years sets the decade's tone; each year adds its own.</dd>
+          </dl>
+          <p class="muted">Bazi is a cultural tradition, not science. This site is for fun and reflection.</p>
+        </details>
+      </section>
+
+      <section class="card section section-birth" aria-labelledby="birth-heading">
+        <h2 id="birth-heading"><span class="section-badge" aria-hidden="true">生</span>When were you born?</h2>
+        <form id="birth-form" novalidate>
+          <div class="field-row">
+            <label class="field">
+              <span>Birth date</span>
+              <input type="date" id="birth-date" min="1901-01-01" max="2099-12-31" required />
+            </label>
+            <label class="field">
+              <span>Birth time</span>
+              <input type="time" id="birth-time" />
+            </label>
+          </div>
+          <fieldset class="field">
+            <legend>Birth place <span class="muted">(nearest city, for true solar time)</span></legend>
+            <div class="field-row place-row">
+              <label class="field">
+                <span>Country or region</span>
+                <select id="birth-country">
+                  <option value="">Not listed: use clock time</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>State or province</span>
+                <select id="birth-region" disabled></select>
+              </label>
+              <label class="field">
+                <span>City</span>
+                <select id="birth-city" disabled></select>
+              </label>
+            </div>
+          </fieldset>
+          <label class="checkbox">
+            <input type="checkbox" id="hour-unknown" />
+            I don't know my birth time (use date only)
+          </label>
+          <fieldset class="field">
+            <legend>Gender <span class="muted">(sets which way your 10-year luck cycles run)</span></legend>
+            <div class="radio-row">
+              <label><input type="radio" name="gender" value="male" /> Male</label>
+              <label><input type="radio" name="gender" value="female" /> Female</label>
+            </div>
+          </fieldset>
+          <p class="error" id="birth-error" role="alert"></p>
+          <button type="submit" class="primary">Show my life curve</button>
+        </form>
+      </section>
+
+      <div id="results" hidden>
+        <section class="card section section-curve" aria-labelledby="curve-heading">
+          <h2 id="curve-heading"><span class="section-badge" aria-hidden="true">运</span>Your life curve</h2>
+          <ul class="legend-chips" aria-label="How to read the curve">
+            <li><span class="chip-swatch good-swatch"></span>Good stretch</li>
+            <li><span class="chip-swatch hard-swatch"></span>Harder stretch</li>
+            <li><span class="chip-swatch pin-swatch"></span>Your event</li>
+            <li><span class="chip-icon forecast-label">✦</span>Key year ahead</li>
+            <li><span class="chip-icon">👆</span>Tap a year to read it</li>
+          </ul>
+          <div id="chart" class="life-chart"></div>
+          <p class="change-note" id="change-note" aria-live="polite" hidden></p>
+          <div id="year-detail" class="year-detail" aria-live="polite"></div>
+        </section>
+
+        <section class="card section section-events" aria-labelledby="events-heading">
+          <h2 id="events-heading"><span class="section-badge" aria-hidden="true">事</span>My life events</h2>
+          <p class="muted section-lead">Add something that happened or that you plan. It bends your curve from that year on.</p>
+          <form id="event-form" class="event-form" novalidate>
+            <label class="field year-field">
+              <span>Year</span>
+              <input type="number" id="event-year" inputmode="numeric" placeholder="2024" />
+            </label>
+            <label class="field title-field">
+              <span>What happened?</span>
+              <input type="text" id="event-title" maxlength="40" placeholder="e.g. Started college" list="event-presets" />
+              <datalist id="event-presets"></datalist>
+            </label>
+            <label class="field category-field">
+              <span>Type</span>
+              <select id="event-category">
+                <option value="">Choose…</option>
+              </select>
+            </label>
+            <label class="field impact-field">
+              <span>Effect</span>
+              <select id="event-impact">
+                <option value="3">Great +3</option>
+                <option value="2" selected>Good +2</option>
+                <option value="1">A bit good +1</option>
+                <option value="-1">A bit bad −1</option>
+                <option value="-2">Bad −2</option>
+                <option value="-3">Very bad −3</option>
+              </select>
+            </label>
+            <label class="field lasting-field">
+              <span>How long</span>
+              <select id="event-lasting">
+                <option value="false">One-time</option>
+                <option value="true">Lasting change</option>
+              </select>
+            </label>
+            <div class="event-actions">
+              <button type="submit" class="primary" id="event-submit">Add event</button>
+              <button type="button" class="secondary" id="event-cancel" hidden>Cancel</button>
+            </div>
+          </form>
+          <p class="error" id="event-error" role="alert"></p>
+          <p class="muted empty" id="event-empty">
+            No events yet. Try adding something that already happened and watch the curve move.
+          </p>
+          <ul class="event-list" id="event-list"></ul>
+          <p class="calibration" id="calibration-note" aria-live="polite"></p>
+        </section>
+
+        <section class="card section section-chart" aria-labelledby="chart-info-heading">
+          <h2 id="chart-info-heading"><span class="section-badge" aria-hidden="true">命</span>Your Bazi chart</h2>
+          <p class="muted section-lead">Where your curve comes from: the moment you were born, written in Bazi.</p>
+          <div class="chart-info">
+            <div>
+              <div class="pillars" id="pillars"></div>
+              <p class="hint">Top: heavenly stem 天干 · Bottom: earthly branch 地支 · Color: its element</p>
+            </div>
+            <div class="summary" id="summary"></div>
+          </div>
+          <details class="explainer">
+            <summary>See your five elements</summary>
+            <figure class="element-cycle-block">
+              <div id="element-cycle" class="element-cycle"></div>
+              <figcaption class="hint">
+                Each element <span class="feeds-key">feeds</span> the next one around the ring (生) and
+                <span class="controls-key">holds back</span> the one across from it (克). Around each element is
+                what it means for you; your own is marked "You".
+              </figcaption>
+            </figure>
+            <div class="element-bars-block">
+              <p class="hint">How much of each element is in your chart</p>
+              <div class="element-bars" id="element-bars" aria-label="Strength of the five elements"></div>
+            </div>
+          </details>
+          <details class="explainer">
+            <summary>How does this chart become my curve?</summary>
+            <p>Every year starts at a score of 50. Then:</p>
+            <ul>
+              <li>
+                <strong>Your 10-year luck cycle</strong> (大运) adds or takes away up to 20 points, depending on
+                whether its elements help you.
+              </li>
+              <li><strong>That year's own pillar</strong> (流年) adds or takes away up to 14 points the same way.</li>
+              <li>
+                <strong>Special meetings</strong> between that year's branch and your chart move it a few points: a
+                clash 冲 (−6), a combination 合 (+4), a punishment 刑 (−5), or a three-way merge 三合 (up to ±7).
+              </li>
+              <li>
+                <strong>Your own events</strong> then push that year and later years, most of all in years of the same
+                theme (career, money, study…).
+              </li>
+            </ul>
+            <p>
+              Tap any year on the curve and look at <em>Why this score</em> to see these parts for that year. The
+              rules follow traditional Bazi ideas, but the exact point values are this site's own choices.
+            </p>
+          </details>
+        </section>
+      </div>
+    </main>
+
+    <footer class="page-footer muted">
+      Just for fun: your future is yours to make. Your data stays in your own browser.
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.7.7/lunar.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js"></script>
+    <script src="src/places.js"></script>
+    <script src="src/bazi.js"></script>
+    <script src="src/app.js"></script>
+  </body>
+</html>
