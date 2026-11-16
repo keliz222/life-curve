@@ -1038,4 +1038,15 @@ button {
   .life-chart {
     height: 300px;
   }
+
+  /* On a phone the curve runs edge to edge across its card, for a few more pixels per year. */
+  .section-curve {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .section-curve .life-chart {
+    width: calc(100% + 24px);
+    margin: 0 -12px;
+  }
 }

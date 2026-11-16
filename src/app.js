@@ -18,6 +18,8 @@ const CHART_GRID_LEFT = 40;
 // Charts narrower than this (in pixels) are on a phone and start zoomed in to this many years.
 const PHONE_CHART_WIDTH = 560;
 const PHONE_YEARS_SHOWN = 20;
+// Phase bands narrower than this (in pixels) show no summary above them.
+const MIN_PHASE_LABEL_WIDTH = 40;
 // Years from this one on are the future and get forecasts.
 const CURRENT_YEAR = new Date().getFullYear();
 // Marker labels on the same side closer than this (in pixels, beyond their half-widths) collide.
@@ -579,7 +581,8 @@ function phaseMarkArea(zoom = chartView.getOption().dataZoom[0]) {
           name: `${phase.phrase.en}\n${phase.phrase.zh}`,
           xAxis: String(startYear),
           itemStyle: { color: i % 2 === 0 ? cssVar("--band") : "transparent" },
-          label: { width: Math.max(0, bandWidth - 4) },
+          // Too narrow a sliver would show only a stray letter, so it gets no summary.
+          label: { show: bandWidth >= MIN_PHASE_LABEL_WIDTH, width: Math.max(0, bandWidth - 4) },
         },
         { xAxis: String(endYear) },
       ],
