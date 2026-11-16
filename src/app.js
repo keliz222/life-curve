@@ -12,7 +12,12 @@ const IMPACT_LABELS = {
 };
 
 // Chart grid's left + right margins, in pixels.
-const CHART_SIDE_MARGINS = 56;
+const CHART_SIDE_MARGINS = 70;
+// Space left of the plot for the score axis, in pixels; the rest of CHART_SIDE_MARGINS is on the right.
+const CHART_GRID_LEFT = 40;
+// Charts narrower than this (in pixels) are on a phone and start zoomed in to this many years.
+const PHONE_CHART_WIDTH = 560;
+const PHONE_YEARS_SHOWN = 20;
 // Years from this one on are the future and get forecasts.
 const CURRENT_YEAR = new Date().getFullYear();
 // Marker labels on the same side closer than this (in pixels, beyond their half-widths) collide.
@@ -443,11 +448,12 @@ function renderChart() {
   const grid = cssVar("--grid");
 
   const gray = cssVar("--text-muted");
+  const zoom = startingZoom();
   chartView.setOption(
     {
       animation: true,
       textStyle: { fontFamily: cssVar("--font"), fontWeight: 300 },
-      grid: { left: 40, right: CHART_SIDE_MARGINS - 40, top: 68, bottom: 76 },
+      grid: { left: CHART_GRID_LEFT, right: CHART_SIDE_MARGINS - CHART_GRID_LEFT, top: 68, bottom: 76 },
       tooltip: {
         trigger: "axis",
         formatter: (params) => {
@@ -490,8 +496,8 @@ function renderChart() {
         ],
       },
       dataZoom: [
-        { type: "inside" },
-        { type: "slider", height: 18, bottom: 8, textStyle: { color: text, fontSize: CHART_TEXT_SIZE } },
+        { type: "inside", ...zoom },
+        { type: "slider", height: 18, bottom: 8, textStyle: { color: text, fontSize: CHART_TEXT_SIZE }, ...zoom },
       ],
       series: [
         {
@@ -510,10 +516,9 @@ function renderChart() {
             lineStyle: { color: text, type: "dashed", width: 1 },
             label: { show: false },
           },
-          // A full redraw resets the zoom, so lay the labels out for the whole curve.
-          markPoint: { data: chartMarkPoints({ start: 0, end: 100 }) },
-          // A full redraw resets the zoom, so size the labels for the whole curve.
-          markArea: phaseMarkArea({ start: 0, end: 100 }),
+          // A full redraw resets the zoom, so lay the labels out for the starting view.
+          markPoint: { data: chartMarkPoints(zoom) },
+          markArea: phaseMarkArea(zoom),
         },
         ...(state.previousPoints
           ? [
@@ -537,6 +542,18 @@ function renderChart() {
 
 // Light alternating bands, one per luck-cycle phase, with its summary phrase above.
 // Each label is English with the Chinese idiom below it, cut short to fit its band.
+// On a phone, 80 years squeezed into the screen flattens the curve, so start on about 20 years
+// around the person's current age; the slider or a pinch shows the rest. Wider screens show it all.
+function startingZoom() {
+  if (elements.chart.clientWidth >= PHONE_CHART_WIDTH) return { start: 0, end: 100 };
+  const lastIndex = state.points.length - 1;
+  const firstIndex = Math.min(Math.max(0, CURRENT_YEAR - state.points[0].year - 5), lastIndex - PHONE_YEARS_SHOWN);
+  return {
+    start: (firstIndex / lastIndex) * 100,
+    end: ((firstIndex + PHONE_YEARS_SHOWN) / lastIndex) * 100,
+  };
+}
+
 function pixelsPerYear(zoom) {
   const visibleYears = Math.max(1, (state.points.length * (zoom.end - zoom.start)) / 100);
   return (elements.chart.clientWidth - CHART_SIDE_MARGINS) / visibleYears;
@@ -544,17 +561,28 @@ function pixelsPerYear(zoom) {
 
 function phaseMarkArea(zoom = chartView.getOption().dataZoom[0]) {
   const yearWidth = pixelsPerYear(zoom);
+  const lastIndex = state.points.length - 1;
+  const firstYear = state.points[0].year;
+  const firstVisibleYear = firstYear + Math.floor((lastIndex * zoom.start) / 100);
+  const lastVisibleYear = firstYear + Math.ceil((lastIndex * zoom.end) / 100);
 
-  const data = state.phases.map((phase, i) => {
-    const bandWidth = (phase.endYear - phase.startYear + 1) * yearWidth;
+  // A band cut off by the chart's edge is drawn only for its visible years, so its summary is
+  // centered over what shows instead of spilling onto the next band.
+  const data = state.phases.flatMap((phase, i) => {
+    const startYear = Math.max(phase.startYear, firstVisibleYear);
+    const endYear = Math.min(phase.endYear, lastVisibleYear);
+    if (startYear > endYear) return [];
+    const bandWidth = (endYear - startYear + 1) * yearWidth;
     return [
-      {
-        name: `${phase.phrase.en}\n${phase.phrase.zh}`,
-        xAxis: String(phase.startYear),
-        itemStyle: { color: i % 2 === 0 ? cssVar("--band") : "transparent" },
-        label: { width: Math.max(0, bandWidth - 4) },
-      },
-      { xAxis: String(phase.endYear) },
+      [
+        {
+          name: `${phase.phrase.en}\n${phase.phrase.zh}`,
+          xAxis: String(startYear),
+          itemStyle: { color: i % 2 === 0 ? cssVar("--band") : "transparent" },
+          label: { width: Math.max(0, bandWidth - 4) },
+        },
+        { xAxis: String(endYear) },
+      ],
     ];
   });
 
@@ -651,18 +679,36 @@ function chartMarkPoints(zoom = chartView.getOption().dataZoom[0]) {
   }
 
   const yearWidth = pixelsPerYear(zoom);
+  const lastIndex = state.points.length - 1;
+  const firstVisible = (lastIndex * zoom.start) / 100;
+  const lastVisible = (lastIndex * zoom.end) / 100;
+  const firstYear = state.points[0].year;
   const shown = [];
   for (const mark of marks) {
     const width = mark.text.length * LABEL_CHAR_WIDTH;
+    const index = mark.year - firstYear;
+    const x = index * yearWidth;
+    // A label centered on a marker near the chart's edge would be cut off, so it runs inward instead.
+    const roomLeft = (index - firstVisible) * yearWidth + CHART_GRID_LEFT;
+    const roomRight = (lastVisible - index) * yearWidth + CHART_SIDE_MARGINS - CHART_GRID_LEFT;
+    let align = "center";
+    let from = x - width / 2;
+    if (width / 2 > roomRight) {
+      align = "right";
+      from = x - width;
+    } else if (width / 2 > roomLeft) {
+      align = "left";
+      from = x;
+    }
+    const to = from + width;
     const collides = shown.some(
-      (other) =>
-        other.side === mark.side &&
-        Math.abs(other.year - mark.year) * yearWidth < (other.width + width) / 2 + MIN_LABEL_GAP,
+      (other) => other.side === mark.side && from < other.to + MIN_LABEL_GAP && other.from < to + MIN_LABEL_GAP,
     );
     mark.item.label.show = !collides;
+    mark.item.label.align = align;
     mark.item.label.formatter = mark.text;
     mark.item.emphasis = { label: { show: true } };
-    if (!collides) shown.push({ ...mark, width });
+    if (!collides) shown.push({ side: mark.side, from, to });
   }
   return marks.map((mark) => mark.item);
 }

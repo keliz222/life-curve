@@ -191,6 +191,20 @@ select {
   width: 100%;
 }
 
+/* iOS Safari gives date and time inputs a fixed minimum width that spills past the card on phones,
+   and centers their text; these keep them inside the field and aligned like the other inputs. */
+input[type="date"],
+input[type="time"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+  display: block;
+}
+
+input::-webkit-date-and-time-value {
+  text-align: left;
+}
+
 input:disabled {
   opacity: 0.5;
 }
@@ -1020,7 +1034,8 @@ button {
     display: none;
   }
 
+  /* Wider than tall, so the curve reads as a line rather than a square. */
   .life-chart {
-    height: 340px;
+    height: 300px;
   }
 }
